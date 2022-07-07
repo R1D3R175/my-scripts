@@ -41,7 +41,7 @@ do
             list_interfaces
         ;;
         -v | --verbose )
-            VERBOSE="> /dev/stdout"
+            VERBOSE="/dev/stdout"
             shift 2
         ;;
         -h | --help )

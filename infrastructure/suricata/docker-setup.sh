@@ -8,7 +8,7 @@ function help() {
 }
 
 function list_interfaces() {
-	echo -e "${RED_BOLD}Your Network Interfaces are:${RESET}"
+    echo -e "${RED_BOLD}Your Network Interfaces are:${RESET}"
     
     for ((i = 1; i <= ${#network_interfaces[@]}; i++));
     do
@@ -37,10 +37,10 @@ INSTALL_DIR=""
 while :
 do
     case "$1" in
-		-d | --directory )
-			INSTALL_DIR="$2"
-			shift 2
-		;;
+        -d | --directory )
+            INSTALL_DIR="$2"
+            shift 2
+        ;;
         -l | --list_interfaces )
             list_interfaces
         ;;
@@ -70,8 +70,8 @@ fi
 
 if [ -z "$INSTALL_DIR" ];
 then
-	echo -e "${RED_BOLD}You must pass the installation directory!${RESET}"
-	help
+    echo -e "${RED_BOLD}You must pass the installation directory!${RESET}"
+    help
 fi
 
 INSTALL_DIR=$(realpath $INSTALL_DIR)
@@ -106,14 +106,14 @@ mkdir -p "${INSTALL_DIR}/" &> "$VERBOSE"
 
 if [ ! -d "${INSTALL_DIR}/" ];
 then
-	echo -e "${RED_BOLD}Failed to create ${INSTALL_DIR}/...${RESET}"
-	exit 0
+    echo -e "${RED_BOLD}Failed to create ${INSTALL_DIR}/...${RESET}"
+    exit 0
 fi
 
 echo -e "${RED_BOLD}Creating sub-directories for Docker Volumes: ${RESET}\n\
 	${GREEN}- ${INSTALL_DIR}/etc/ ${RESET}\n\
 	${GREEN}- ${INSTALL_DIR}/lib/ ${RESET}\n\
-	${GREEN}- ${INSTALL_DIR}/log/ ${RESET}"
+${GREEN}- ${INSTALL_DIR}/log/ ${RESET}"
 mkdir {"${INSTALL_DIR}/etc/","${INSTALL_DIR}/lib/","${INSTALL_DIR}/log/"} &> "$VERBOSE"
 
 echo -e "${RED_BOLD}Running Suricata container (detatch)...${RESET}"
@@ -127,20 +127,23 @@ Creating rules file ${INSTALL_DIR}/etc/ctf.rules${RESET}"
 touch "${INSTALL_DIR}/etc/ctf.rules" &> "$VERBOSE"
 
 PYTHON_FIX='import re
+
 FILE_PATH = "'${INSTALL_DIR}'/etc/suricata.yaml"
 SIP_FIX = r"sip:\n      #enabled: no"
 MQTT_FIX = r"mqtt:\n      # enabled: no"
 RDP_FIX = r"rdp:\n      #enabled: yes"
 ADD_RULES = r"rule-files:\n  - suricata.rules"
+
 with open(FILE_PATH, "r") as real_file:
-    content = "".join(real_file.readlines())
-    content = re.sub(SIP_FIX, "sip:\n      enabled: no", content)
-    content = re.sub(MQTT_FIX, "mqtt:\n      enabled: no", content)
-    content = re.sub(RDP_FIX, "rdp:\n      enabled: no", content)
-    content = re.sub(ADD_RULES, ADD_RULES + "\n  - /etc/suricata/ctf.rules", content)
+	content = "".join(real_file.readlines())
+	content = re.sub(SIP_FIX, "sip:\n      enabled: no", content)
+	content = re.sub(MQTT_FIX, "mqtt:\n      enabled: no", content)
+	content = re.sub(RDP_FIX, "rdp:\n      enabled: no", content)
+	content = re.sub(ADD_RULES, ADD_RULES + "\n  - /etc/suricata/ctf.rules", content)
+
 with open(FILE_PATH, "w") as modified_file:
 	modified_file.write(content)'
-	
+
 python3 -c "${PYTHON_FIX}" &> "$VERBOSE"
 
 echo -e "${RED_BOLD}Updating Suricata${RESET}"

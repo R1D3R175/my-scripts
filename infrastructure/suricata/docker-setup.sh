@@ -61,7 +61,7 @@ done
 if [ "$#" -eq 0 ];
 then
     echo -e "${RED_BOLD}You must pass the interface name to the script!${RESET}"
-    exit 0
+    help
 fi
 
 network_interfaces=($(ls /sys/class/net))

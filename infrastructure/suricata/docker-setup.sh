@@ -8,7 +8,6 @@ function help() {
 }
 
 function list_interfaces() {
-    network_interfaces=($(ls /sys/class/net))
     echo -e "${RED_BOLD}Your Network Interfaces are:${RESET}"
     
     for ((i = 1; i <= ${#network_interfaces[@]}; i++));
@@ -162,22 +161,25 @@ SIP_FIX = r"sip:\n      #enabled: no"
 MQTT_FIX = r"mqtt:\n      # enabled: no"
 RDP_FIX = r"rdp:\n      #enabled: yes"
 ADD_RULES = r"rule-files:\n  - suricata.rules"
+NFQ = r"nfq:\n#  mode: accept\n#  repeat-mark: 1\n#  repeat-mask: 1"
+
 
 with open(FILE_PATH, "r") as real_file:
-	content = "".join(real_file.readlines())
-	content = re.sub(SIP_FIX, "sip:\n      enabled: no", content)
-	content = re.sub(MQTT_FIX, "mqtt:\n      enabled: no", content)
-	content = re.sub(RDP_FIX, "rdp:\n      enabled: no", content)
-	content = re.sub(ADD_RULES, ADD_RULES + "\n  - /etc/suricata/ctf.rules", content)
+    content = "".join(real_file.readlines())
+    content = re.sub(SIP_FIX, "sip:\n      enabled: no", content)
+    content = re.sub(MQTT_FIX, "mqtt:\n      enabled: no", content)
+    content = re.sub(RDP_FIX, "rdp:\n      enabled: no", content)
+    content = re.sub(ADD_RULES, ADD_RULES + "\n  - /etc/suricata/ctf.rules", content)
+    content = re.sub(NFQ, "nfq:\n  mode: repeat\n  repeat-mark: 1\n  repeat-mask: 1", content)
 
 with open(FILE_PATH, "w") as modified_file:
-	modified_file.write(content)'
+    modified_file.write(content)'
 
 python3 -c "${PYTHON_FIX}" &> "$VERBOSE"
 
 echo -e "${RED_BOLD}Running suricata-update${RESET}"
 docker exec -it --user suricata suricata suricata-update -f &> "$VERBOSE"
-echo -e "${RED_BOLD}Running suricatasc -c reload-rules${RESET}"
 
-echo -e "${RED_BOLD}Re-attaching back to Suricata's container${RESET}"
-docker attach suricata
+echo -e "${RED_BOLD}Modifying iptables to redirect all traffic to Suricata${RESET}"
+iptables -I INPUT -j NFQUEUE
+iptables -I OUTPUT -j NFQUEUE

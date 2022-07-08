@@ -8,6 +8,7 @@ function help() {
 }
 
 function list_interfaces() {
+    network_interfaces=($(ls /sys/class/net))
     echo -e "${RED_BOLD}Your Network Interfaces are:${RESET}"
     
     for ((i = 1; i <= ${#network_interfaces[@]}; i++));

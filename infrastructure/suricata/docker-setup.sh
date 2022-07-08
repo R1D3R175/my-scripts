@@ -18,12 +18,37 @@ function list_interfaces() {
     exit 0
 }
 
+function banner() {
+	DOCKER="${BG_WHITE_FG_BLUE}                        ##         .               ${RESET}
+${BG_WHITE_FG_BLUE}                  ## ## ##        ==               ${RESET}
+${BG_WHITE_FG_BLUE}               ## ## ## ## ##    ===               ${RESET}
+${BG_WHITE_FG_BLUE}           /\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\\___/ ===             ${RESET}             
+${BG_WHITE_FG_BLUE}      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~~ ~ /  ===- ~~~      ${RESET}
+${BG_WHITE_FG_BLUE}           \\______ o           __/                 ${RESET}
+${BG_WHITE_FG_BLUE}             \\    \\         __/                    ${RESET}
+${BG_WHITE_FG_BLUE}              \\____\\_______/                       ${RESET}
+${BG_WHITE_FG_BLUE}                                                   ${RESET}       
+${BG_WHITE_FG_BLUE}              |          |                         ${RESET}
+${BG_WHITE_FG_BLUE}           __ |  __   __ | _  __   _               ${RESET}
+${BG_WHITE_FG_BLUE}          /  \\| /  \\ /   |/  / _\\ |                ${RESET}
+${BG_WHITE_FG_BLUE}          \\__/| \\__/ \\__ |\\_ \\__  |                ${RESET}"
+
+	SURICATA="${BG_BROWN_FG_YELLOW_BOLD}            __.              ,                     ${RESET}
+${BG_BROWN_FG_YELLOW_BOLD}           (__ . .._.* _. _.-+- _.                 ${RESET}
+${BG_BROWN_FG_YELLOW_BOLD}           .__)(_|[  |(_.(_] | (_]      by R1D3R175${RESET}"
+
+	echo -e "${DOCKER}"
+	echo -e "${SURICATA}"
+}
+
 RESET="\e[0m"
 UNDERLINED="\e[4m"
 RED_BOLD="\e[1;31m"
 GREEN="\e[32m"
 GREEN_BOLD="\e[1;32m"
 BG_RED_FG_WHITE="\e[41;1;37m"
+BG_WHITE_FG_BLUE="\e[44;1;37m"
+BG_BROWN_FG_YELLOW_BOLD="\e[48;5;130m\e[38;5;220m\e[1m"
 
 SHORT=d:,l,v,h
 LONG=directory:,list_interfaces,verbose,help
@@ -33,6 +58,8 @@ eval set -- "$OPTS"
 
 VERBOSE="/dev/null"
 INSTALL_DIR=""
+
+banner
 
 while :
 do

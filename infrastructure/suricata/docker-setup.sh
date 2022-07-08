@@ -19,6 +19,17 @@ function list_interfaces() {
     exit 0
 }
 
+function get_subnet() {
+    ip=$(ip -f inet addr show $1 | awk '/inet / {print $2}')
+    sep="/"
+
+    index=${ip%%$sep*}
+    index=${#index}
+
+    ip=${ip%.*}.0${ip:$index}
+    echo $ip
+}
+
 function banner() {
 	DOCKER="${BG_WHITE_FG_BLUE}                        ##         .               ${RESET}
 ${BG_WHITE_FG_BLUE}                  ## ## ##        ==               ${RESET}
@@ -163,7 +174,7 @@ MQTT_FIX = r"mqtt:\n      # enabled: no"
 RDP_FIX = r"rdp:\n      #enabled: yes"
 ADD_RULES = r"rule-files:\n  - suricata.rules"
 NFQ = r"nfq:\n#  mode: accept"
-# \n#  repeat-mark: 1\n#  repeat-mask: 1
+HOME_NET_FIX = r"HOME_NET: \"[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]\""
 
 with open(FILE_PATH, "r") as real_file:
     content = "".join(real_file.readlines())
@@ -172,7 +183,7 @@ with open(FILE_PATH, "r") as real_file:
     content = re.sub(RDP_FIX, "rdp:\n      enabled: no", content)
     content = re.sub(ADD_RULES, ADD_RULES + "\n  - /etc/suricata/ctf.rules", content)
     content = re.sub(NFQ, "nfq:\n  mode: accept", content)
-    # \n  repeat-mark: 1\n  repeat-mask: 1
+    content = re.sub(HOME_NET_FIX, "HOME_NET: \"['$(get_subnet $1)']\"", content)
 
 with open(FILE_PATH, "w") as modified_file:
     modified_file.write(content)'
@@ -187,8 +198,4 @@ echo -e "${RED_BOLD}Running suricata-update${RESET}"
 docker exec -it --user suricata suricata suricata-update -f &> "$VERBOSE"
 
 echo -e "${RED_BOLD}Modifying iptables to redirect all traffic to Suricata${RESET}"
-echo '*filter
--A INPUT -j NFQUEUE
--A OUTPUT -j NFQUEUE
-COMMIT' > "${INSTALL_DIR}/etc/redirect_ipt.rules"
-iptables-apply -t 30 "${INSTALL_DIR}/etc/redirect_ipt.rules" > "$VERBOSE"
+###################################################################################

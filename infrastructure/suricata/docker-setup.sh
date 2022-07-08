@@ -162,8 +162,8 @@ SIP_FIX = r"sip:\n      #enabled: no"
 MQTT_FIX = r"mqtt:\n      # enabled: no"
 RDP_FIX = r"rdp:\n      #enabled: yes"
 ADD_RULES = r"rule-files:\n  - suricata.rules"
-NFQ = r"nfq:\n#  mode: accept\n#  repeat-mark: 1\n#  repeat-mask: 1"
-
+NFQ = r"nfq:\n#  mode: accept"
+# \n#  repeat-mark: 1\n#  repeat-mask: 1
 
 with open(FILE_PATH, "r") as real_file:
     content = "".join(real_file.readlines())
@@ -171,16 +171,24 @@ with open(FILE_PATH, "r") as real_file:
     content = re.sub(MQTT_FIX, "mqtt:\n      enabled: no", content)
     content = re.sub(RDP_FIX, "rdp:\n      enabled: no", content)
     content = re.sub(ADD_RULES, ADD_RULES + "\n  - /etc/suricata/ctf.rules", content)
-    content = re.sub(NFQ, "nfq:\n  mode: repeat\n  repeat-mark: 1\n  repeat-mask: 1", content)
+    content = re.sub(NFQ, "nfq:\n  mode: accept", content)
+    # \n  repeat-mark: 1\n  repeat-mask: 1
 
 with open(FILE_PATH, "w") as modified_file:
     modified_file.write(content)'
 
+sleep 0.1 # Sometimes files don't appear instantly
 python3 -c "${PYTHON_FIX}" &> "$VERBOSE"
+
+echo -e "${RED_BOLD}Running with NFQueue in Inline Mode${RESET}"
+docker exec -it --user suricata suricata suricata -c /etc/suricata/suricata.yaml -q 0 -D &> "$VERBOSE"
 
 echo -e "${RED_BOLD}Running suricata-update${RESET}"
 docker exec -it --user suricata suricata suricata-update -f &> "$VERBOSE"
 
 echo -e "${RED_BOLD}Modifying iptables to redirect all traffic to Suricata${RESET}"
-iptables -I INPUT -j NFQUEUE
-iptables -I OUTPUT -j NFQUEUE
+echo '*filter
+-A INPUT -j NFQUEUE
+-A OUTPUT -j NFQUEUE
+COMMIT' > "${INSTALL_DIR}/etc/redirect_ipt.rules"
+iptables-apply -t 30 "${INSTALL_DIR}/etc/redirect_ipt.rules" > "$VERBOSE"

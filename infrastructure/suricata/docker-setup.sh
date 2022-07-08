@@ -140,7 +140,7 @@ fi
 echo -e "${RED_BOLD}Creating sub-directories for Docker Volumes: ${RESET}\n\
 	${GREEN}- ${INSTALL_DIR}/etc/ ${RESET}\n\
 	${GREEN}- ${INSTALL_DIR}/lib/ ${RESET}\n\
-${GREEN}- ${INSTALL_DIR}/log/ ${RESET}"
+	${GREEN}- ${INSTALL_DIR}/log/ ${RESET}"
 mkdir {"${INSTALL_DIR}/etc/","${INSTALL_DIR}/lib/","${INSTALL_DIR}/log/"} &> "$VERBOSE"
 
 echo -e "${RED_BOLD}Running Suricata container (detatch)...${RESET}"
